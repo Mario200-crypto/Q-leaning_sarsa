@@ -1,5 +1,5 @@
 # Q-leaning_sarsa
-## 1
+## Exploración de Hiperparámetros y Convergencia
 
 ### 1
 ¿Cómo afecta una  α baja (0.01) vs. una alta (0.9) a la velocidad con la que las curvas de recompensa (gráfica plot_rewards) se estabilizan?
@@ -109,5 +109,91 @@ Las flechas muestran un camino coherente hacia la meta, rodeando el acantilado.
 SARSA incorpora el riesgo de exploración en su política (on-policy).
 Con pocos episodios, la penalización por caer al acantilado “asusta” al agente y lo hace evitar la zona peligrosa, pero aún no ha aprendido a distinguir entre moverse seguro y avanzar hacia la meta.
 Q-Learning (off-policy) aprende más rápido el camino óptimo porque “asume” que siempre tomará la mejor acción, pero SARSA necesita más experiencia para balancear seguridad y progreso hacia la meta.
+
+## Comparación On-Policy vs. Off-Policy
+
+### 5
+
+Q-Value Heatmaps: Estado (fila=2, col=5), acción 'Abajo' (↓)
+Ubicación:
+En una cuadrícula 4x12, el estado (fila=2, col=5) corresponde al índice:
+state = 2 * 12 + 5 = 29
+Acción 'Abajo' (↓):
+En Gym, normalmente la acción 1 es 'Abajo'.
+¿Cuál tiene un valor más negativo, Q-Learning o SARSA?
+SARSA suele tener un valor más negativo para la acción 'Abajo' en ese estado, especialmente si está cerca del acantilado.
+¿Por qué?
+SARSA (on-policy):
+El valor Q refleja el riesgo real de caer al acantilado debido a la exploración.
+Si el agente explora y cae, recibe la penalización de -100, lo que hace que el valor Q de moverse 'Abajo' cerca del acantilado sea muy negativo.
+
+El valor depende de la acción realmente tomada, que puede ser riesgosa.
+Q-Learning (off-policy):
+El valor Q refleja el valor de la mejor acción posible desde el siguiente estado, asumiendo que el agente siempre elige óptimamente.
+Target:
+
+Q(s,a)←Q(s,a)+α[r+γ 
+
+El valor es menos negativo porque asume que el agente no caerá si sigue la mejor acción.
+Conclusión:
+SARSA: Q más negativo para acciones peligrosas cerca del acantilado.
+Q-Learning: Q menos negativo, asume que el agente no caerá si actúa óptimamente.
+
+ Describe las rutas mostradas en las Policy Grids finales de Q-Learning y SARSA
+Q-Learning (off-policy):
+Ruta más corta:
+El agente sigue el borde del acantilado, tomando el camino más directo y arriesgado hacia la meta.
+La política muestra flechas pegadas al acantilado.
+Riesgo:
+Si el agente explora, puede caer, pero la política aprendida es la óptima en longitud.
+SARSA (on-policy):
+Ruta más segura:
+El agente evita el borde del acantilado, prefiere rutas más largas pero seguras.
+La política muestra flechas que rodean la zona peligrosa.
+Riesgo:
+Menos caídas, pero la ruta es más larga y la recompensa promedio puede ser menor.
+
+### 6
+
+¿Qué algoritmo muestra "caídas" más pronunciadas en la recompensa durante el entrenamiento? ¿A qué evento del entorno corresponde esto?
+Q-Learning suele mostrar caídas más pronunciadas (grandes bajones) en la curva de recompensa durante el entrenamiento.
+¿Por qué?
+Q-Learning aprende la política óptima (camino más corto, pegado al acantilado), pero durante la exploración, a veces el agente toma una acción aleatoria y cae al acantilado.
+Caer al acantilado implica una penalización de -100 y reinicio al inicio, lo que causa una gran caída en la recompensa total de ese episodio.
+SARSA también puede mostrar caídas, pero suelen ser menos frecuentes y menos pronunciadas porque su política es más conservadora y evita el borde peligroso.
+
+ Aunque Q-Learning aprende la ruta óptima, ¿por qué su recompensa promedio final en la gráfica podría no ser significativamente mejor (o incluso peor a veces) que la de SARSA?
+
+Q-Learning aprende la ruta más corta, pero esa ruta es muy arriesgada: si el agente explora (por ϵ-greedy) y cae al acantilado, recibe una gran penalización.
+SARSA aprende una ruta más larga pero más segura, evitando el acantilado y, por lo tanto, evita las grandes penalizaciones.
+Durante la evaluación (sin exploración):
+Q-Learning puede mostrar una mejor recompensa promedio si nunca cae.
+Pero durante el entrenamiento (con exploración), Q-Learning puede tener una recompensa promedio igual o peor que SARSA debido a las penalizaciones frecuentes por caídas.
+En la gráfica:
+La media móvil de Q-Learning puede ser más baja o igual a la de SARSA, especialmente si 
+ϵ no ha decaído lo suficiente y el agente sigue explorando
+
+## Experimentación con Entornos
+
+¿Esperarías una gran diferencia en la política final aprendida por Q-Learning y SARSA? ¿Por qué?
+No, no esperas una gran diferencia.
+Motivo:
+En un entorno determinista, ambos algoritmos pueden aprender la política óptima porque no hay incertidumbre en el resultado de las acciones.
+Q-Learning (off-policy) y SARSA (on-policy) convergen a la misma política óptima si exploran lo suficiente.
+Verificación:
+Si ejecutas ambos, verás que las Policy Grids y las recompensas finales son muy similares.
+
+¿Cómo afecta esto al aprendizaje? ¿Se vuelve más importante la diferencia entre on-policy y off-policy ahora?
+Sí, la diferencia se vuelve más importante.
+Motivo:
+Ahora, las acciones pueden tener resultados inesperados (puedes resbalar).
+SARSA (on-policy): Aprende una política más conservadora, considerando el riesgo real de resbalar.
+Q-Learning (off-policy): Aprende la política óptima suponiendo que siempre tomará la mejor acción, ignorando el riesgo de resbalar.
+Resultado:
+SARSA puede preferir rutas más seguras, Q-Learning puede “arriesgarse” más.
+Las recompensas y políticas pueden diferir más que en el caso determinista.
+
+
+
 
 
